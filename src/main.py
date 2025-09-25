@@ -1,4 +1,5 @@
 from src.models.menu_item import MenuItem
+from src.models.guest import Guest
 
 def load_menu():
     return [
@@ -9,5 +10,22 @@ def load_menu():
 
 if __name__ == "__main__":
     menu = load_menu()
-    for item in menu:
-        print(item)
+
+    # Create two guests
+    ali = Guest(1, "Ali")
+    bob = Guest(2, "Bob")
+
+    # Round 1 (Appetizers)
+    ali.add_item_to_order(menu[0])  # Ali orders Calamari
+    bob.add_item_to_order(menu[0])    # Bob orders Calamari
+
+    # Round 2 (Mains)
+    ali.add_item_to_order(menu[1])  # Ali orders Fish and Chips
+    bob.add_item_to_order(menu[1])    # Bob orders Fish and Chips
+
+    # Round 3 (Desserts)
+    ali.add_item_to_order(menu[2])  # Ali orders Cheesecake
+
+    # Show results
+    print(ali)
+    print(bob)
