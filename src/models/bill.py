@@ -7,20 +7,21 @@ class Bill:
         self.service_rate = service_rate
         self.tip_rate = tip_rate
 
+
+    # Subtotal = sum of all orders at the table (before charges)
     def calculate_subtotal(self) -> float:
-        """Subtotal = sum of all orders at the table (before charges)."""
         return self.table.calculate_subtotal()
 
+    # Final total = subtotal + tax + service + tip
     def calculate_total(self) -> float:
-        """Final total = subtotal + tax + service + tip."""
         subtotal = self.calculate_subtotal()
         tax = subtotal * self.tax_rate
         service = subtotal * self.service_rate
         tip = subtotal * self.tip_rate
         return subtotal + tax + service + tip
 
+    # Return detailed breakdown as a dictionary
     def breakdown(self) -> dict:
-        """Return detailed breakdown as a dictionary."""
         subtotal = self.calculate_subtotal()
         return {
             "subtotal": subtotal,
