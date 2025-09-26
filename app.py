@@ -13,7 +13,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 #single table for now
 table = Table(1)
-#table.menu = table
+
 
 # Load menu from JSON file
 menu = load_menu("menu.json")
@@ -136,6 +136,7 @@ def get_table_items():
 @app.route("/split/amount", methods=["POST"])
 def split_by_amount():
     """Split by custom amounts."""
+
     data = request.get_json() or {}
 
     # Extract service/tip
@@ -145,6 +146,7 @@ def split_by_amount():
 
     bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
     return jsonify(BillSplitter.split_by_amount(bill, data))
+    
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5050)

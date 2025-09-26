@@ -129,8 +129,6 @@ export default function Split() {
     });
 
     Object.entries(itemAssignments).forEach(([itemKey, assignedGuests]) => {
-
-
       if (assignedGuests.length === 1) {
         payload[assignedGuests[0]].items!.push(itemKey);
       } else if (assignedGuests.length > 1) {
@@ -138,7 +136,7 @@ export default function Split() {
         assignedGuests.forEach(guest => {
           payload[guest].shared![itemKey] = sharePerGuest;
         });
-     }
+      }
     });
 
     try {
@@ -411,7 +409,9 @@ export default function Split() {
                 {Object.entries(splitResult).map(([guest, amount]) => (
                   <div key={guest} className="flex justify-between border-b py-1">
                     <span>{guest}</span>
-                    <span className="font-bold text-green-600">${typeof amount === 'number' ? amount.toFixed(2) : amount}</span>
+                    <span className="font-bold text-green-600">
+                      ${typeof amount === 'number' ? amount.toFixed(2) : amount}
+                    </span>
                   </div>
                 ))}
               </div>
