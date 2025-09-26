@@ -48,6 +48,12 @@ def get_bill():
     bill = Bill(table, tax_rate=0.20, service_rate=0.15, tip_rate=0.10)
     return jsonify(bill.breakdown())
 
+@app.route("/table/reset", methods=["POST"])
+def reset_table():
+    """Clear all orders from the table."""
+    table.orders = []
+    return jsonify({"message": "Table cleared"})
+
 @app.route("/split/equal", methods=["POST"])
 def split_equal():
     """Split bill equally among guests."""
