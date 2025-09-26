@@ -25,25 +25,36 @@ class BillSplitter:
         subtotal = bill.calculate_subtotal()
         breakdown = bill.breakdown()
 
-        # Map ordered items to unique keys
-        indexed_items = {}
-        for idx, m in enumerate(ordered_items, start=1):
-            key = f"{m.item_id}-{idx}"
-            indexed_items[key] = m
-
         result = {}
         for guest, data in guest_items.items():
-            guest_subtotal = 0
+            guest_subtotal = 0.0
 
-            # Full items
+            # Handle full items
             for key in data.get("items", []):
-                if key in indexed_items:
-                    guest_subtotal += indexed_items[key].price
+                if "-" in str(key):
+                    item_id, idx = key.split("-")
+                    idx = int(idx) - 1
+                    # Walk ordered_items and match both id + index
+                    count = 0
+                    for m in ordered_items:
+                        if str(m.item_id) == item_id:
+                            count += 1
+                            if count == idx + 1:  # match nth occurrence
+                                guest_subtotal += m.price
+                                break
 
-            # Shared items
+            # Handle shared items
             for key, fraction in data.get("shared", {}).items():
-                if key in indexed_items:
-                    guest_subtotal += indexed_items[key].price * fraction
+                if "-" in str(key):
+                    item_id, idx = key.split("-")
+                    idx = int(idx) - 1
+                    count = 0
+                    for m in ordered_items:
+                        if str(m.item_id) == item_id:
+                            count += 1
+                            if count == idx + 1:
+                                guest_subtotal += m.price * fraction
+                                break
 
             # Proportional charges
             proportion = guest_subtotal / subtotal if subtotal > 0 else 0

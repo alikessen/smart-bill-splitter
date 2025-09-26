@@ -42,10 +42,21 @@ def add_order():
     table.add_order(order)
     return jsonify({"message": "Order added", "table_subtotal": table.calculate_subtotal()})
 
-@app.route("/bill", methods=["GET"])
+@app.route("/bill", methods=["GET", "POST"])
 def get_bill():
-    """Return subtotal + charges + total."""
-    bill = Bill(table, tax_rate=0.20, service_rate=0.15, tip_rate=0.10)
+    """Return subtotal + charges + total with custom service and tip options."""
+    data = request.get_json(silent=True) or {}
+
+    # Service charge toggle
+    if data.get("service_enabled", True):
+        service_rate = float(data.get("service_rate", 0.15))
+    else:
+        service_rate = 0.0
+
+    # Tip rate (defaults to 10%)
+    tip_rate = float(data.get("tip_rate", 0.10))
+
+    bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
     return jsonify(bill.breakdown())
 
 @app.route("/table/reset", methods=["POST"])
@@ -57,9 +68,16 @@ def reset_table():
 @app.route("/split/equal", methods=["POST"])
 def split_equal():
     """Split bill equally among guests."""
-    data = request.get_json()
+    data = request.get_json() or {}
+
     num_guests = data.get("num_guests", 1)
-    bill = Bill(table, tax_rate=0.20, service_rate=0.15, tip_rate=0.10)
+
+    # Handle service + tip config
+    service_enabled = data.get("service_enabled", True)
+    service_rate = data.get("service_rate", 0.15) if service_enabled else 0.0
+    tip_rate = data.get("tip_rate", 0.10)
+
+    bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
     return jsonify(BillSplitter.split_equally(bill, num_guests))
 
 @app.route("/split/item", methods=["POST"])
@@ -72,14 +90,28 @@ def split_by_item():
       "Guest 2": { "items": [1], "shared": { "3": 0.5 } }
     }
     """
-    data = request.get_json()
-    bill = Bill(table, tax_rate=0.20, service_rate=0.15, tip_rate=0.10)
-    # Collect all ordered items (with duplicates preserved)
+    data = request.get_json() or {}
+
+    # Extract service/tip
+    if data.get("service_enabled", True):
+        service_rate = data.get("service_rate", 0.15)
+    else:
+        service_rate = 0.0
+    tip_rate = data.get("tip_rate", 0.10)
+
+    # Remove meta fields before passing to BillSplitter
+    guest_items = {
+        k: v for k, v in data.items()
+        if k not in ("service_enabled", "service_rate", "tip_rate")
+    }
+
+    bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
+
     ordered_items = []
     for order in table.orders:
         ordered_items.extend(order.items)
 
-    return jsonify(BillSplitter.split_by_item(bill, data, ordered_items))
+    return jsonify(BillSplitter.split_by_item(bill, guest_items, ordered_items))
 
 @app.route("/table/items", methods=["GET"])
 def get_table_items():
@@ -89,9 +121,12 @@ def get_table_items():
         ordered_items.extend(order.items)
 
     items_with_keys = []
-    for idx, m in enumerate(ordered_items, start=1):
+    counters = {}
+    for m in ordered_items:
+        counters[m.item_id] = counters.get(m.item_id, 0) + 1
+        idx = counters[m.item_id]
         items_with_keys.append({
-            "key": f"{m.item_id}-{idx}",
+            "key": f"{m.item_id}-{idx}",   # e.g. "2-1", "2-2"
             "id": m.item_id,
             "name": m.name,
             "category": m.category,
@@ -104,8 +139,14 @@ def get_table_items():
 @app.route("/split/amount", methods=["POST"])
 def split_by_amount():
     """Split by custom amounts."""
-    data = request.get_json()
-    bill = Bill(table, tax_rate=0.20, service_rate=0.15, tip_rate=0.10)
+    data = request.get_json() or {}
+
+    # Extract service/tip
+    service_enabled = data.pop("service_enabled", True)
+    service_rate = data.pop("service_rate", 0.15) if service_enabled else 0.0
+    tip_rate = data.pop("tip_rate", 0.10)
+
+    bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
     return jsonify(BillSplitter.split_by_amount(bill, data))
 
 if __name__ == "__main__":
