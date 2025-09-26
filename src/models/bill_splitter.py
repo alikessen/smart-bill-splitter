@@ -10,29 +10,40 @@ class BillSplitter:
         return {f"Guest {i+1}": round(share, 2) for i in range(num_guests)}
 
     @staticmethod
-    def split_by_item(bill: Bill, guest_items: dict, menu: list) -> dict:
+    def split_by_item(bill: Bill, guest_items: dict, ordered_items: list) -> dict:
         """
         Split the bill by items consumed.
         guest_items = {
-            "Guest 1": { "items": [2, 5], "shared": {1: 0.5} },
-            "Guest 2": { "items": [3, 4], "shared": {1: 0.5} }
+            "Guest 1": { "items": ["2-1"], "shared": {"3-1": 0.5} },
+            "Guest 2": { "items": ["2-2"], "shared": {"3-1": 0.5} }
         }
-        - "items": full items chosen by the guest (list of IDs)
-        - "shared": dict of {item_id: fraction} for shared items
+        - Each ordered item has a unique key "itemId-index"
+         (e.g. Fish and Chips #1 -> "2-1", Fish and Chips #2 -> "2-2").
+        - "items": full items chosen by the guest
+        - "shared": dict of {unique_item_key: fraction} for shared items
         """
         subtotal = bill.calculate_subtotal()
         breakdown = bill.breakdown()
 
+        # Map ordered items to unique keys
+        indexed_items = {}
+        for idx, m in enumerate(ordered_items, start=1):
+            key = f"{m.item_id}-{idx}"
+            indexed_items[key] = m
+
         result = {}
         for guest, data in guest_items.items():
-            # Normal items
-            guest_subtotal = sum(m.price for m in menu if m.item_id in data.get("items", []))
+            guest_subtotal = 0
+
+            # Full items
+            for key in data.get("items", []):
+                if key in indexed_items:
+                    guest_subtotal += indexed_items[key].price
 
             # Shared items
-            for item_id, fraction in data.get("shared", {}).items():
-                for m in menu:
-                    if m.item_id == item_id:
-                        guest_subtotal += m.price * fraction
+            for key, fraction in data.get("shared", {}).items():
+                if key in indexed_items:
+                    guest_subtotal += indexed_items[key].price * fraction
 
             # Proportional charges
             proportion = guest_subtotal / subtotal if subtotal > 0 else 0
@@ -44,6 +55,7 @@ class BillSplitter:
             result[guest] = round(guest_total, 2)
 
         return result
+
 
     @staticmethod
     def split_by_amount(bill: Bill, contributions: dict) -> dict:

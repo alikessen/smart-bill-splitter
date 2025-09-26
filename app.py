@@ -68,7 +68,32 @@ def split_by_item():
     """
     data = request.get_json()
     bill = Bill(table, tax_rate=0.20, service_rate=0.15, tip_rate=0.10)
-    return jsonify(BillSplitter.split_by_item(bill, data, menu))
+    # Collect all ordered items (with duplicates preserved)
+    ordered_items = []
+    for order in table.orders:
+        ordered_items.extend(order.items)
+
+    return jsonify(BillSplitter.split_by_item(bill, data, ordered_items))
+
+@app.route("/table/items", methods=["GET"])
+def get_table_items():
+    """Return all ordered items with unique keys (duplicates included)."""
+    ordered_items = []
+    for order in table.orders:
+        ordered_items.extend(order.items)
+
+    items_with_keys = []
+    for idx, m in enumerate(ordered_items, start=1):
+        items_with_keys.append({
+            "key": f"{m.item_id}-{idx}",
+            "id": m.item_id,
+            "name": m.name,
+            "category": m.category,
+            "description": m.description,
+            "price": m.price
+        })
+
+    return jsonify(items_with_keys)
 
 @app.route("/split/amount", methods=["POST"])
 def split_by_amount():
