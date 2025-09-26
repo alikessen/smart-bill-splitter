@@ -4,6 +4,7 @@ from src.models.order import Order
 from src.models.table import Table
 from src.models.bill import Bill
 from src.models.bill_splitter import BillSplitter
+from src.models.menu_loader import load_menu
 
 from flask_cors import CORS
 
@@ -12,14 +13,10 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 #single table for now
 table = Table(1)
+#table.menu = table
 
-# Sample menu
-menu = [
-    MenuItem(1, "Calamari", "Fried squid with lemon", "Appetizer", 12.50),
-    MenuItem(2, "Fish and Chips", "Crispy battered fish with fries", "Main", 28.00),
-    MenuItem(3, "Cheesecake", "Classic New York cheesecake", "Dessert", 9.00)
-]
-
+# Load menu from JSON file
+menu = load_menu("menu.json")
 
 
 @app.route("/menu", methods=["GET"])

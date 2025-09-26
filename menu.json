@@ -1,0 +1,72 @@
+[
+  {
+    "item_id": 1,
+    "name": "Sirloin Plate",
+    "description": "Golden Herb Butter Sauce. Served with Bread, Salad, and choice of French Fries or Roasted Potatoes.",
+    "category": "Signature Plate",
+    "price": 26.95
+  },
+  {
+    "item_id": 2,
+    "name": "Rotisserie Chicken Plate",
+    "description": "Marrow Gravy Sauce. Served with Bread, Salad, and Roasted Potatoes.",
+    "category": "Signature Plate",
+    "price": 19.95
+  },
+  {
+    "item_id": 3,
+    "name": "Vegetable Plate",
+    "description": "Portobello Mushroom, Pumpkin, Jerusalem Artichokes, Rocket, Pomegranate Molasse, Tahini Sauce. Served with Bread, Salad and choice of French Fries or Roasted Potatoes.",
+    "category": "Signature Plate",
+    "price": 14.95
+  },
+  {
+    "item_id": 4,
+    "name": "Lentil Soup",
+    "description": "Hearty and wholesome, served with Bread.",
+    "category": "Appetiser",
+    "price": 8.95
+  },
+  {
+    "item_id": 5,
+    "name": "Extra French Fries",
+    "description": "Crispy golden fries.",
+    "category": "Side",
+    "price": 5.00
+  },
+  {
+    "item_id": 6,
+    "name": "Parmigiana Sandwich",
+    "description": "Grilled Aubergine, Tomato Sauce, Pesto, Parmesan, Gouda. Served with Salad and choice of French Fries or Roasted Potatoes.",
+    "category": "Handheld",
+    "price": 14.95
+  },
+  {
+    "item_id": 7,
+    "name": "Beef Burger",
+    "description": "Double Beef Patty, Brioche Bun, Burger Cheese, Lettuce, Burger Sauce. Served with Salad and French Fries or Roasted Potatoes.",
+    "category": "Handheld",
+    "price": 15.95
+  },
+  {
+    "item_id": 8,
+    "name": "Mochi Platter",
+    "description": "Seasonal flavours.",
+    "category": "Dessert",
+    "price": 9.95
+  },
+  {
+    "item_id": 9,
+    "name": "Classic Tiramisu",
+    "description": "Italian classic.",
+    "category": "Dessert",
+    "price": 9.95
+  },
+  {
+    "item_id": 10,
+    "name": "Cheesecake",
+    "description": "Classic creamy cheesecake.",
+    "category": "Dessert",
+    "price": 9.95
+  }
+]
