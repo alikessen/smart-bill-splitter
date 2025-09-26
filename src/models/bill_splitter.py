@@ -72,5 +72,12 @@ class BillSplitter:
         remaining = total - paid
 
         result = {guest: round(amount, 2) for guest, amount in contributions.items()}
-        result["Remaining"] = round(remaining, 2)
+
+        # Show overpaid amount
+        if remaining < 0:
+            result["Overpaid"] = round(abs(remaining), 2)
+            result["Remaining"] = 0
+        else:
+            result["Remaining"] = round(remaining, 2)
+
         return result
