@@ -322,8 +322,11 @@ export default function Split() {
                           type="number"
                           step="0.01"
                           placeholder="0.00"
-                          value={guest.amount}
-                          onChange={(e) => updateGuestAmount(index, parseFloat(e.target.value) || 0)}
+                          value={guest.amount === 0 ? "" : guest.amount}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            updateGuestAmount(index, value === "" ? 0 : parseFloat(value));
+                          }}
                           className="w-24 pl-7 pr-3 py-2 border rounded-lg"
                         />
                       </div>
