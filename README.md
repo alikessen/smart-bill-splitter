@@ -23,6 +23,14 @@ Built with Flask (backend) and React + Vite + Tailwind via Bolt.new (frontend).
 
 ---
 
+## Prerequisites
+Before running the project, make sure you have the following installed:
+
+- **Python 3.10 or above** (for the backend)  
+- **Node.js 18 or above** (includes npm, for the frontend)  
+
+---
+
 ## Getting Started
 
 ### 1. Clone the repo
