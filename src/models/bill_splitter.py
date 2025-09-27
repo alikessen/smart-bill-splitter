@@ -16,7 +16,7 @@ class BillSplitter:
         """
         Build a lookup table so each ordered item can be accessed quickly.
         - Input: ordered_items = list of MenuItem objects (could include duplicates)
-        - Output: dictionary mapping unique keys like "2-1" → MenuItem object
+        - Output: dictionary mapping unique keys like "2-1" -> MenuItem object
         (where "2" = item_id, "1" = nth time that item was ordered)
         """
         lookup = {}
