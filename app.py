@@ -5,7 +5,6 @@ from src.models.table import Table
 from src.models.bill import Bill
 from src.models.bill_splitter import BillSplitter
 from src.models.menu_loader import load_menu
-
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder=".")
@@ -14,22 +13,22 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 #single table for now
 table = Table(1)
 
-
 # Load menu from JSON file
 menu = load_menu("menu.json")
 
 
+# Return all menu items
 @app.route("/menu", methods=["GET"])
 def get_menu():
-    """Return all menu items."""
     return jsonify([
         {"id": m.item_id, "name": m.name, "description": m.description, "category": m.category, "price": m.price}
         for m in menu
     ])
 
+
+# Add a round of items to the table
 @app.route("/order", methods=["POST"])
 def add_order():
-    """Add a round of items to the table."""
     data = request.get_json()
     order = Order()
     for item_id in data.get("items", []):
@@ -39,9 +38,10 @@ def add_order():
     table.add_order(order)
     return jsonify({"message": "Order added", "table_subtotal": table.calculate_subtotal()})
 
+
+# Return subtotal + charges + total with custom service and tip options
 @app.route("/bill", methods=["GET", "POST"])
 def get_bill():
-    """Return subtotal + charges + total with custom service and tip options."""
     data = request.get_json(silent=True) or {}
 
     # Service charge toggle
@@ -56,15 +56,19 @@ def get_bill():
     bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
     return jsonify(bill.breakdown())
 
+
+# Clear all orders from the table
 @app.route("/table/reset", methods=["POST"])
 def reset_table():
-    """Clear all orders from the table."""
+
     table.orders = []
     return jsonify({"message": "Table cleared"})
 
+
+# Split bill equally among guests
 @app.route("/split/equal", methods=["POST"])
 def split_equal():
-    """Split bill equally among guests."""
+
     data = request.get_json() or {}
 
     num_guests = data.get("num_guests", 1)
@@ -77,16 +81,11 @@ def split_equal():
     bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
     return jsonify(BillSplitter.split_equally(bill, num_guests))
 
+
+# Split by items per guest with shared support
 @app.route("/split/item", methods=["POST"])
 def split_by_item():
-    """
-    Split by items per guest (with shared support).
-    Example body:
-    {
-      "Guest 1": { "items": [2], "shared": { "3": 0.5 } },
-      "Guest 2": { "items": [1], "shared": { "3": 0.5 } }
-    }
-    """
+ 
     data = request.get_json() or {}
 
     # Extract service/tip
@@ -110,9 +109,11 @@ def split_by_item():
 
     return jsonify(BillSplitter.split_by_item(bill, guest_items, ordered_items))
 
+
+# Return all ordered items with unique keys 
 @app.route("/table/items", methods=["GET"])
 def get_table_items():
-    """Return all ordered items with unique keys (duplicates included)."""
+
     ordered_items = []
     for order in table.orders:
         ordered_items.extend(order.items)
@@ -133,9 +134,10 @@ def get_table_items():
 
     return jsonify(items_with_keys)
 
+
+# Split by custom amounts
 @app.route("/split/amount", methods=["POST"])
 def split_by_amount():
-    """Split by custom amounts."""
 
     data = request.get_json() or {}
 
