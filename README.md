@@ -8,7 +8,7 @@ Built with Flask (backend) and React + Vite + Tailwind via Bolt.new (frontend).
 ## Features
 - **Menu Management**: Menu items stored in `menu.json` with ID, name, description, category, and price.  
 - **Order Taking**: Add items across multiple rounds (appetizers, mains, desserts).  
-- **Bill Calculation**: Subtotal + configurable tax (20%), service charge, and tip.  
+- **Bill Calculation**: Subtotal + tax (20%) + configurable service charge, and tip.  
 - **Splitting Methods**:  
   - **Equal Split** – divide evenly among guests.  
   - **By Item** – assign specific items to each guest (supports shared items).  
@@ -91,8 +91,8 @@ The application supports three methods of splitting the bill.
 - Shared items are divided evenly among selected guests (half each if two people share an appetizer).  
 - Tax, service, and tip are applied proportionally to each guest’s subtotal, so that guests only pay their fair share of extras.  
 - Example:  
-  - Guest A orders Steak (£20) + half Appetizer (£5).  
-  - Guest B orders Sandwich (£15) + half Appetizer (£5).  
+  - Guest A orders Steak ($20) + half Appetizer ($5).  
+  - Guest B orders Sandwich ($15) + half Appetizer ($5).  
   - Each guest then pays their subtotal plus proportional tax/service/tip.  
 - Implementation: items assigned to guests via dictionaries, with shared items represented as fractional values (e.g., `{ "Appetizer": 0.5 }`).  
 
