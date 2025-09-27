@@ -83,7 +83,7 @@ The application supports three methods of splitting the bill.
 
 ### 1. Equal Split
 - The total bill is divided evenly among the specified number of guests.  
-- Example: A £90 bill split between 3 guests results in £30 per guest.  
+- Example: A $90 bill split between 3 guests results in $30 per guest.  
 - Implementation: simply `total / num_guests`.  
 
 ### 2. Split by Item
@@ -100,9 +100,9 @@ The application supports three methods of splitting the bill.
 - Guests enter custom contributions.  
 - The system tracks how much has been paid and calculates the Remaining balance or any Overpaid amount.  
 - Example:  
-  - Total bill: £100  
-  - Guest A pays £60, Guest B pays £50  
-  - Remaining = £100 – £110 = Overpaid £10  
+  - Total bill: $100  
+  - Guest A pays $60, Guest B pays $50  
+  - Remaining = $100 – $110 = Overpaid $10  
 - Implementation: dictionary mapping guest names → amounts. The system sums contributions and compares against the total.  
 
 ---
