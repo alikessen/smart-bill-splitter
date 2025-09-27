@@ -131,6 +131,16 @@ The application supports three methods of splitting the bill.
 - **JSON for Persistence**:  
   The menu is stored in `menu.json`, allowing the application to load data at startup without hardcoding. 
 
+- **Efficiency in Split by Item**:  
+  Originally, the `split_by_item` function scanned the full list of ordered items every time a guest’s item key was matched. This was correct but inefficient for larger orders.  
+  I refactored it to use a **lookup table** (`itemId-index -> MenuItem`) built once at the start.  
+  - **Before**: O(Guests × Items × OrderedItems)  
+  - **After**: O(Guests × Items) + O(OrderedItems) for preprocessing  
+  This makes the function both faster and clearer, since it now follows three clear steps:  
+  1. Build lookup for ordered items  
+  2. Assign full and shared items to each guest  
+  3. Apply proportional tax, service, and tip  
+
 ---
  
  
