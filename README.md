@@ -69,6 +69,36 @@ Frontend runs at: **http://localhost:5173**
 
 ---
 
+## Bill Splitting Logic
+
+The application supports three methods of splitting the bill.  
+
+### 1. Equal Split
+- The total bill is divided evenly among the specified number of guests.  
+- Example: A £90 bill split between 3 guests results in £30 per guest.  
+- Implementation: simply `total / num_guests`.  
+
+### 2. Split by Item
+- Each guest selects the specific items they consumed.  
+- Shared items are divided evenly among selected guests (half each if two people share an appetizer).  
+- Tax, service, and tip are applied proportionally to each guest’s subtotal, so that guests only pay their fair share of extras.  
+- Example:  
+  - Guest A orders Steak (£20) + half Appetizer (£5).  
+  - Guest B orders Sandwich (£15) + half Appetizer (£5).  
+  - Each guest then pays their subtotal plus proportional tax/service/tip.  
+- Implementation: items assigned to guests via dictionaries, with shared items represented as fractional values (e.g., `{ "Appetizer": 0.5 }`).  
+
+### 3. Split by Amount
+- Guests enter custom contributions.  
+- The system tracks how much has been paid and calculates the Remaining balance or any Overpaid amount.  
+- Example:  
+  - Total bill: £100  
+  - Guest A pays £60, Guest B pays £50  
+  - Remaining = £100 – £110 = Overpaid £10  
+- Implementation: dictionary mapping guest names → amounts. The system sums contributions and compares against the total.  
+
+---
+
 ## Assumptions
 - Single table is supported at a time (reset clears everything).  
 - Tax is fixed at 20%.  
