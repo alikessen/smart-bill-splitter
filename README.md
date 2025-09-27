@@ -1,7 +1,7 @@
 # Smart Bill Splitter
 
 A simple web app to manage a restaurant bill and split it equally, by item, or by custom amount.
-Built with Flask (backend) and React + Vite + Tailwind (frontend).
+Built with Flask (backend) and React + Vite + Tailwind via Bolt.new (frontend).
 
 ---
 
@@ -27,7 +27,7 @@ Built with Flask (backend) and React + Vite + Tailwind (frontend).
 
 ### 1. Clone the repo
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/alikessen/smart-bill-splitter
 cd smart-bill-splitter
 ```
 
@@ -74,18 +74,25 @@ Frontend runs at: **http://localhost:5173**
 - Tax is fixed at 20%.  
 - Service charge and tip are configurable.  
 - Shared items are divided evenly among selected guests.  
+- Floating-point values are rounded to two decimal places for display.
 
 ---
 
 ## Design Choices
-- **Separation of concerns**:  
-  - `MenuItem`, `Order`, `Table`, `Bill`, `BillSplitter` handle core logic.  
-- **Persistence**: Menu stored in JSON so it survives restarts.  
-- **API-first**: Backend routes clearly defined and consumed by frontend.  
+- **Object-Oriented Design**:  
+  The core logic is encapsulated in classes (`MenuItem`, `Order`, `Table`, `Bill`, `BillSplitter`). This makes the code modular, easier to maintain, and extensible (for example, adding discounts or multiple tables later would only require updating certain classes).  
+
+- **Data Structures**:  
+  - **Lists** are used to store menu items, orders, and guests because they maintain order and allow duplicates.
+
+  - **Dictionaries** are used for flexible mappings such as guest contributions and item assignments in the “split by item” feature. This makes it easy to look up amounts by guest name and to represent shared items with fractional values.  
+
+- **API-first Approach**:  
+  The backend provides clear endpoints (`/menu`, `/order`, `/bill`, `/split/*`) that are consumed by the frontend. This separation of concerns makes the frontend independent and easy to replace or extend.  
+
+- **JSON for Persistence**:  
+  The menu is stored in `menu.json`, allowing the application to load data at startup without hardcoding. 
 
 ---
-
-## Future Improvements
-- Support multiple tables.  
-- Generate per-guest receipts.  
+ 
  
