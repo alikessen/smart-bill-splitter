@@ -157,7 +157,18 @@ export default function Split() {
   // --- Helpers for Guests ---
   const addGuest = () => setGuests(prev => [...prev, { name: `Guest ${prev.length + 1}`, amount: 0 }]);
   const removeGuest = (index: number) => guests.length > 1 && setGuests(prev => prev.filter((_, i) => i !== index));
-  const updateGuestAmount = (index: number, amount: number) => setGuests(prev => prev.map((g, i) => i === index ? { ...g, amount } : g));
+
+  // Give small error message if amount is less than 0
+  const updateGuestAmount = (index: number, amount: number) => {
+    if (amount < 0) {
+      toast.error("Amount cannot be negative");
+      return;
+    }
+    setGuests(prev =>
+      prev.map((g, i) => i === index ? { ...g, amount } : g)
+    );
+  };
+
   const updateGuestName = (index: number, name: string) => setGuests(prev => prev.map((g, i) => i === index ? { ...g, name } : g));
 
   // --- Helpers for Item Split Guests ---
