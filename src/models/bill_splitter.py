@@ -78,6 +78,7 @@ class BillSplitter:
         }
         The function returns each guest's contribution and the remaining balance.
         """
+        
         total = bill.calculate_total()
         paid = sum(contributions.values())
         remaining = total - paid
