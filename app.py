@@ -10,8 +10,13 @@ from flask_cors import CORS
 app = Flask(__name__, static_folder=".")
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-#single table for now
-table = Table(1)
+# manage multiple table
+tables = {}
+# get existing one or create a new table
+def get_create_table(table_id):
+    if table_id not in tables:
+        tables[table_id] = Table(table_id)
+    return tables[table_id]
 
 # Load menu from JSON file
 menu = load_menu("menu.json")
@@ -27,10 +32,13 @@ def get_menu():
 
 
 # Add a round of items to the table
-@app.route("/order", methods=["POST"])
-def add_order():
+@app.route("/order/<int:table_id>", methods=["POST"])
+def add_order(table_id):
     data = request.get_json()
     order = Order()
+
+    table = get_create_table(table_id)
+
     for item_id in data.get("items", []):
         for m in menu:
             if m.item_id == item_id:
@@ -40,8 +48,8 @@ def add_order():
 
 
 # Return subtotal + charges + total with custom service and tip options
-@app.route("/bill", methods=["GET", "POST"])
-def get_bill():
+@app.route("/bill/<int:table_id>", methods=["GET", "POST"])
+def get_bill(table_id):
     data = request.get_json(silent=True) or {}
 
     # Service charge toggle
@@ -53,21 +61,23 @@ def get_bill():
     # Tip rate (defaults to 10%)
     tip_rate = float(data.get("tip_rate", 0.10))
 
+    table = get_create_table(table_id)
+
     bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
     return jsonify(bill.breakdown())
 
 
 # Clear all orders from the table
-@app.route("/table/reset", methods=["POST"])
-def reset_table():
-
+@app.route("/table/<int:table_id>/reset", methods=["POST"])
+def reset_table(table_id):
+    table = get_create_table(table_id)
     table.orders = []
     return jsonify({"message": "Table cleared"})
 
 
 # Split bill equally among guests
-@app.route("/split/equal", methods=["POST"])
-def split_equal():
+@app.route("/split/<int:table_id>/equal", methods=["POST"])
+def split_equal(table_id):
 
     data = request.get_json() or {}
 
@@ -78,13 +88,15 @@ def split_equal():
     service_rate = data.get("service_rate", 0.15) if service_enabled else 0.0
     tip_rate = data.get("tip_rate", 0.10)
 
+    table = get_create_table(table_id)
+
     bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
     return jsonify(BillSplitter.split_equally(bill, num_guests))
 
 
 # Split by items per guest with shared support
-@app.route("/split/item", methods=["POST"])
-def split_by_item():
+@app.route("/split/<int:table_id>/item", methods=["POST"])
+def split_by_item(table_id):
  
     data = request.get_json() or {}
 
@@ -101,6 +113,7 @@ def split_by_item():
         if k not in ("service_enabled", "service_rate", "tip_rate")
     }
 
+    table = get_create_table(table_id)
     bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
 
     ordered_items = []
@@ -111,9 +124,9 @@ def split_by_item():
 
 
 # Return all ordered items with unique keys 
-@app.route("/table/items", methods=["GET"])
-def get_table_items():
-
+@app.route("/table/<int:table_id>/items", methods=["GET"])
+def get_table_items(table_id):
+    table = get_create_table(table_id)
     ordered_items = []
     for order in table.orders:
         ordered_items.extend(order.items)
@@ -136,8 +149,8 @@ def get_table_items():
 
 
 # Split by custom amounts
-@app.route("/split/amount", methods=["POST"])
-def split_by_amount():
+@app.route("/split/<int:table_id>/amount", methods=["POST"])
+def split_by_amount(table_id):
 
     data = request.get_json() or {}
 
@@ -146,6 +159,7 @@ def split_by_amount():
     service_rate = data.pop("service_rate", 0.15) if service_enabled else 0.0
     tip_rate = data.pop("tip_rate", 0.10)
 
+    table = get_create_table(table_id)
     bill = Bill(table, tax_rate=0.20, service_rate=service_rate, tip_rate=tip_rate)
     return jsonify(BillSplitter.split_by_amount(bill, data))
     
