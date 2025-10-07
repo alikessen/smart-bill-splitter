@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { MenuItem } from '../types';
@@ -14,7 +14,10 @@ export default function Menu() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [searchParams] = useSearchParams();
+  const tableId = searchParams.get("tableId");
 
+  // --- Fetch Menu ---
   const fetchMenu = async () => {
     try {
       setLoading(true);
@@ -32,6 +35,7 @@ export default function Menu() {
     fetchMenu();
   }, []);
 
+  // --- Quantity Controls ---
   const increment = (id: number) => {
     setQuantities(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
   };
@@ -40,7 +44,14 @@ export default function Menu() {
     setQuantities(prev => ({ ...prev, [id]: Math.max((prev[id] || 0) - 1, 0) }));
   };
 
+  // --- Submit Order directly to backend ---
   const handleSubmitOrder = async () => {
+    if (!tableId) {
+      toast.error("No table selected!");
+      navigate("/tables?mode=order");
+      return;
+    }
+
     const items: number[] = [];
     Object.entries(quantities).forEach(([id, qty]) => {
       for (let i = 0; i < qty; i++) {
@@ -55,9 +66,11 @@ export default function Menu() {
 
     try {
       setSubmitting(true);
-      await apiClient.post('/order', { items });
-      toast.success('Order submitted successfully!');
-      setQuantities({}); // reset after submit
+      await apiClient.post(`/order/${tableId}`, { items });
+      toast.success(`Order submitted successfully for Table ${tableId}!`);
+      setQuantities({});
+      // Return to home after submission
+      setTimeout(() => navigate("/"), 500);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to submit order');
     } finally {
@@ -83,12 +96,19 @@ export default function Menu() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/tables?mode=order')}
               className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
             >
               <ArrowLeft className="h-6 w-6 text-gray-600" />
             </button>
-            <h1 className="text-3xl font-bold text-gray-900">Menu</h1>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Menu</h1>
+              {tableId && (
+                <p className="text-gray-600 text-sm mt-1">
+                  Ordering for Table {tableId}
+                </p>
+              )}
+            </div>
           </div>
           
           {totalSelected > 0 && (

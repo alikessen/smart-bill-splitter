@@ -7,6 +7,7 @@ import apiClient from '../api/client';
 import SplitOptions, { SplitMethod } from '../components/SplitOptions';
 import Spinner from '../components/Spinner';
 import ErrorMessage from '../components/ErrorMessage';
+import { useSearchParams } from "react-router-dom";
 
 export default function Split() {
   const navigate = useNavigate();
@@ -20,6 +21,16 @@ export default function Split() {
 
   const [serviceEnabled, setServiceEnabled] = useState(true);
   const [tipRate, setTipRate] = useState(0.10);
+
+  const [searchParams] = useSearchParams();
+  const tableId = searchParams.get("tableId");
+
+  // Redirect if no table ID
+  if (!tableId) {
+    toast.error("No table selected!");
+    navigate("/tables");
+    return null;
+  }
 
   // Equal split
   const [numGuests, setNumGuests] = useState(2);
@@ -39,7 +50,7 @@ export default function Split() {
   // --- Helpers ---
   const handleClearTable = async () => {
     try {
-      await apiClient.post('/table/reset', {});
+      await apiClient.post(`/table/${tableId}/reset`, {});
       toast.success("Table cleared!");
       setSplitResult(null);
       setItemAssignments({});
@@ -56,7 +67,7 @@ export default function Split() {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiClient.post('/bill', {
+      const data = await apiClient.post(`/bill/${tableId}`, {
         service_enabled: serviceEnabled,
         tip_rate: tipRate
       });
@@ -70,7 +81,7 @@ export default function Split() {
 
   const fetchOrderedItems = async () => {
     try {
-      const data = await apiClient.get('/table/items');
+      const data = await apiClient.get(`/table/${tableId}/items`);
       setMenuItems(data);
     } catch (err) {
       console.error('Failed to load ordered items:', err);
@@ -86,7 +97,7 @@ export default function Split() {
   const handleEqualSplit = async () => {
     try {
       setCalculating(true);
-      const result = await apiClient.post('/split/equal', {
+      const result = await apiClient.post(`/split/${tableId}/equal`, {
         num_guests: numGuests,
         service_enabled: serviceEnabled,
         tip_rate: tipRate
@@ -108,7 +119,7 @@ export default function Split() {
 
     try {
       setCalculating(true);
-      const result = await apiClient.post('/split/amount', {
+      const result = await apiClient.post(`/split/${tableId}/amount`, {
         ...payload,
         service_enabled: serviceEnabled,
         tip_rate: tipRate
@@ -141,7 +152,7 @@ export default function Split() {
 
     try {
       setCalculating(true);
-      const result = await apiClient.post('/split/item', {
+      const result = await apiClient.post(`/split/${tableId}/item`, {
         ...payload,
         service_enabled: serviceEnabled,
         tip_rate: tipRate
@@ -158,7 +169,6 @@ export default function Split() {
   const addGuest = () => setGuests(prev => [...prev, { name: `Guest ${prev.length + 1}`, amount: 0 }]);
   const removeGuest = (index: number) => guests.length > 1 && setGuests(prev => prev.filter((_, i) => i !== index));
 
-  // Give small error message if amount is less than 0
   const updateGuestAmount = (index: number, amount: number) => {
     if (amount < 0) {
       toast.error("Amount cannot be negative");
@@ -230,10 +240,13 @@ export default function Split() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center space-x-4 mb-8">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+          <button onClick={() => navigate('/tables?mode=split', { replace: true })} className="p-2 hover:bg-gray-200 rounded-lg transition-colors">
             <ArrowLeft className="h-6 w-6 text-gray-600" />
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Split Bill</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Split Bill</h1>
+            <p className="text-gray-600 text-sm mt-1">Viewing bill for Table {tableId}</p>
+          </div>
         </div>
 
         {error && <ErrorMessage message={error} onRetry={fetchBill} />}

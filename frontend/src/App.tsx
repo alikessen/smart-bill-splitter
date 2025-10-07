@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
 import Split from './pages/Split';
+import Tables from './pages/Tables';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/tables" element={<Tables />} /> 
           <Route path="/split" element={<Split />} />
         </Routes>
       </div>

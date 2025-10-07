@@ -18,8 +18,9 @@ export default function Home() {
           </p>
           
           <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            {/* Order Now Button */}
             <button
-              onClick={() => navigate('/menu')}
+              onClick={() => navigate('/tables?mode=order')}
               className="bg-white hover:bg-gray-50 border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-md transition-all group"
             >
               <div className="flex flex-col items-center space-y-4">
@@ -27,7 +28,7 @@ export default function Home() {
                   <Menu className="h-8 w-8 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">View Menu</h3>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Order Now</h3>
                   <p className="text-gray-600">
                     Browse available items and add them to your order
                   </p>
@@ -35,8 +36,9 @@ export default function Home() {
               </div>
             </button>
             
+            {/* Split Bill Button */}
             <button
-              onClick={() => navigate('/split')}
+              onClick={() => navigate('/tables?mode=split')}
               className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-8 shadow-sm hover:shadow-md transition-all group"
             >
               <div className="flex flex-col items-center space-y-4">
@@ -44,7 +46,7 @@ export default function Home() {
                   <Users className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Start Bill Split</h3>
+                  <h3 className="text-xl font-semibold mb-2">View Bill</h3>
                   <p className="text-blue-100">
                     Calculate how much each person should pay
                   </p>
