@@ -2,23 +2,20 @@ from src.models.bill import Bill
 
 class BillSplitter:
 
+    # Split the bill equally among all guests
     @staticmethod
     def split_equally(bill: Bill, num_guests: int) -> dict:
-        """Split the bill equally among all guests."""
+
         total = bill.calculate_total()
         share = total / num_guests
         return {f"Guest {i+1}": round(share, 2) for i in range(num_guests)}
     
 
 
+    # Build a lookup table so each ordered item can be accessed quickly
     @staticmethod
     def build_lookup(ordered_items: list) -> dict:
-        """
-        Build a lookup table so each ordered item can be accessed quickly.
-        - Input: ordered_items = list of MenuItem objects (could include duplicates)
-        - Output: dictionary mapping unique keys like "2-1" -> MenuItem object
-        (where "2" = item_id, "1" = nth time that item was ordered)
-        """
+
         lookup = {}
         counts = {}
         for m in ordered_items:
@@ -33,17 +30,10 @@ class BillSplitter:
 
         return lookup
 
+
+    # Split the bill by assigning specific items to guests
     @staticmethod
     def split_by_item(bill: Bill, guest_items: dict, ordered_items: list) -> dict:
-        """
-        Split the bill by assigning specific items (and shared fractions) to guests.
-        - guest_items = dictionary mapping each guest to:
-            { "items": ["2-1", "2-2"], "shared": {"3-1": 0.5} }
-            -> "items": full items assigned to the guest
-            -> "shared": fractional ownership of certain items
-        - ordered_items = list of all MenuItems ordered at the table
-        - Returns: dict of guest totals including proportional tax, service, and tip
-        """
 
         subtotal = bill.calculate_subtotal()
         breakdown = bill.breakdown()
@@ -77,11 +67,10 @@ class BillSplitter:
         return result
 
 
+    # Split the bill by custom amounts
     @staticmethod
     def split_by_amount(bill: Bill, contributions: dict) -> dict:
-        """
-        Split the bill by custom amounts.
-        """
+
         total = bill.calculate_total()
         paid = sum(contributions.values())
         remaining = total - paid

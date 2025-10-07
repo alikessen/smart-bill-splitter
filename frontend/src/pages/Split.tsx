@@ -19,11 +19,19 @@ export default function Split() {
   const [splitResult, setSplitResult] = useState<SplitResult | null>(null);
   const [calculating, setCalculating] = useState(false);
 
-  const [serviceEnabled, setServiceEnabled] = useState(true);
-  const [tipRate, setTipRate] = useState(0.10);
-
   const [searchParams] = useSearchParams();
   const tableId = searchParams.get("tableId");
+
+  const [serviceEnabled, setServiceEnabled] = useState(() => {
+    const saved = localStorage.getItem(`serviceEnabled_${tableId}`);
+    return saved ? JSON.parse(saved) : true;
+  });
+
+  const [tipRate, setTipRate] = useState(() => {
+    const saved = localStorage.getItem(`tipRate_${tableId}`);
+    return saved ? parseFloat(saved) : 0.10;
+  });
+
 
   // Redirect if no table ID
   if (!tableId) {
@@ -46,6 +54,12 @@ export default function Split() {
   const [itemSplitStep, setItemSplitStep] = useState<'guests' | 'items'>('guests');
   const [itemAssignments, setItemAssignments] = useState<Record<string, string[]>>({});
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!tableId) return;
+    localStorage.setItem(`serviceEnabled_${tableId}`, JSON.stringify(serviceEnabled));
+    localStorage.setItem(`tipRate_${tableId}`, tipRate.toString());
+  }, [serviceEnabled, tipRate, tableId]);
 
   // --- Helpers ---
   const handleClearTable = async () => {
