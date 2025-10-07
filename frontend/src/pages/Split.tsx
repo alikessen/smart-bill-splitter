@@ -391,7 +391,7 @@ export default function Split() {
                     <div className="flex items-center text-sm text-gray-600"><Users className="h-4 w-4 mr-1" /> Step 1: Add guests</div>
                     {itemSplitGuests.map((guest, i) => (
                       <div key={i} className="flex space-x-2 mb-2">
-                        <input value={guest} onChange={e => updateItemSplitGuestName(i, e.target.value)} className="flex-1 border rounded px-2 py-1" />
+                        <span>{guest}</span>
                         {itemSplitGuests.length > 1 && (
                           <button onClick={() => removeItemSplitGuest(i)} className="text-red-500"><Minus /></button>
                         )}
