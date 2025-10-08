@@ -1,6 +1,6 @@
 export interface MenuItem {
-  id: number;        // original menu item ID
-  key: string;       // unique instance key, e.g. "2-1"
+  id: number;        
+  key: string;      
   name: string;
   category: string;
   description: string;
@@ -15,9 +15,15 @@ export interface BillBreakdown {
   total: number;
 }
 
-export interface SplitResult {
-  [guestName: string]: number;
+export interface GuestBreakdown {
+  subtotal: number;
+  tax: number;
+  service: number;
+  tip: number;
+  total: number;
 }
+
+export type SplitResult = Record<string, GuestBreakdown | number>;
 
 export interface ItemSplitPayload {
   [guestName: string]: {

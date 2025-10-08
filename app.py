@@ -10,6 +10,10 @@ from flask_cors import CORS
 app = Flask(__name__, static_folder=".")
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
+
+# Load menu from JSON file
+menu = load_menu("menu.json")
+
 # manage multiple table
 tables = {}
 # get existing one or create a new table
@@ -17,10 +21,6 @@ def get_create_table(table_id):
     if table_id not in tables:
         tables[table_id] = Table(table_id)
     return tables[table_id]
-
-# Load menu from JSON file
-menu = load_menu("menu.json")
-
 
 # Return all menu items
 @app.route("/menu", methods=["GET"])
@@ -120,6 +120,7 @@ def split_by_item(table_id):
     for order in table.orders:
         ordered_items.extend(order.items)
 
+    print("DEBUG GUEST ITEMS:", guest_items)
     return jsonify(BillSplitter.split_by_item(bill, guest_items, ordered_items))
 
 

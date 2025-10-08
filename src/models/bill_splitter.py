@@ -6,10 +6,29 @@ class BillSplitter:
     @staticmethod
     def split_equally(bill: Bill, num_guests: int) -> dict:
 
-        total = bill.calculate_total()
-        share = total / num_guests
-        return {f"Guest {i+1}": round(share, 2) for i in range(num_guests)}
+        #total = bill.calculate_total()
+        #share = total / num_guests
+        #return {f"Guest {i+1}": round(share, 2) for i in range(num_guests)}
     
+        bill.calculate_components()
+
+        subtotal_share = bill.subtotal / num_guests
+        tax_share = bill.tax / num_guests
+        service_share = bill.service / num_guests
+        tip_share = bill.tip / num_guests
+        total_share = bill.total / num_guests
+
+        result = {}
+        for i in range(num_guests):
+            result[f"Guest {i + 1}"] = {
+                "subtotal": round(subtotal_share, 2),
+                "tax": round(tax_share, 2),
+                "service": round(service_share, 2),
+                "tip": round(tip_share, 2),
+                "total": round(total_share, 2)
+            }
+        return result
+
 
 
     # Build a lookup table so each ordered item can be accessed quickly
@@ -42,6 +61,7 @@ class BillSplitter:
         lookup = BillSplitter.build_lookup(ordered_items)
 
         result = {}
+
         for guest, data in guest_items.items():
             guest_subtotal = 0.0
 
@@ -54,23 +74,31 @@ class BillSplitter:
             for key, fraction in data.get("shared", {}).items():
                 if key in lookup:
                     guest_subtotal += lookup[key].price * fraction
+            
 
-            # Proportional extras by share of subtotal
+            # Proportional extras
             proportion = guest_subtotal / subtotal if subtotal > 0 else 0
-            guest_total = guest_subtotal
-            guest_total += breakdown["tax"] * proportion
-            guest_total += breakdown["service"] * proportion
-            guest_total += breakdown["tip"] * proportion
+            guest_tax = breakdown["tax"] * proportion
+            guest_service = breakdown["service"] * proportion
+            guest_tip = breakdown["tip"] * proportion
+            guest_total = guest_subtotal + guest_tax + guest_service + guest_tip
 
-            result[guest] = round(guest_total, 2)
+            # return full detailed object
+            result[guest] = {
+                "subtotal": round(guest_subtotal, 2),
+                "tax": round(guest_tax, 2),
+                "service": round(guest_service, 2),
+                "tip": round(guest_tip, 2),
+                "total": round(guest_total, 2)
+            }
 
         return result
-
+        
 
     # Split the bill by custom amounts
     @staticmethod
     def split_by_amount(bill: Bill, contributions: dict) -> dict:
-
+        
         total = bill.calculate_total()
         paid = sum(contributions.values())
         remaining = total - paid
@@ -85,3 +113,42 @@ class BillSplitter:
             result["Remaining"] = round(remaining, 2)
 
         return result
+        """
+
+        bill._calculate_components()
+        total_bill = bill.total
+        total_contributed = sum(contributions.values())
+
+        if total_contributed <= 0:
+            return {"error": "Invalid total amount"}
+
+        result = {}
+
+        for guest, amount in contributions.items():
+            ratio = amount / total_contributed
+
+            subtotal = bill.subtotal * ratio
+            tax = bill.tax * ratio
+            service = bill.service * ratio
+            tip = bill.tip * ratio
+            total = bill.total * ratio
+
+            result[guest] = {
+                "subtotal": round(subtotal, 2),
+                "tax": round(tax, 2),
+                "service": round(service, 2),
+                "tip": round(tip, 2),
+                "total": round(total, 2)
+            }
+
+        # calculate leftover or excess payment
+        remaining = total_bill - total_contributed
+        result["Summary"] = {
+            "Total Bill": round(total_bill, 2),
+            "Total Contributed": round(total_contributed, 2),
+            "Remaining": round(remaining, 2) if remaining > 0 else 0.0,
+            "Overpaid": abs(round(remaining, 2)) if remaining < 0 else 0.0
+        }
+
+        return result
+        """

@@ -7,6 +7,22 @@ class Bill:
         self.service_rate = service_rate
         self.tip_rate = tip_rate
 
+        # component values
+        self.subtotal = 0.0
+        self.tax = 0.0
+        self.service = 0.0
+        self.tip = 0.0
+        self.total = 0.0
+
+        self.calculate_components()
+
+    def calculate_components(self):
+        self.subtotal = self.table.calculate_subtotal()
+        self.tax = self.subtotal * self.tax_rate
+        self.service = self.subtotal * self.service_rate
+        self.tip = self.subtotal * self.tip_rate
+        self.total = self.subtotal + self.tax + self.service + self.tip
+
 
     # Subtotal = sum of all orders at the table (before charges)
     def calculate_subtotal(self) -> float:
@@ -22,13 +38,13 @@ class Bill:
 
     # Return detailed breakdown as a dictionary
     def breakdown(self) -> dict:
-        subtotal = self.calculate_subtotal()
+        self.calculate_components()
         return {
-            "subtotal": subtotal,
-            "tax": subtotal * self.tax_rate,
-            "service": subtotal * self.service_rate,
-            "tip": subtotal * self.tip_rate,
-            "total": self.calculate_total()
+            "subtotal": round(self.subtotal, 2),
+            "tax": round(self.tax, 2),
+            "service": round(self.service, 2),
+            "tip": round(self.tip, 2),
+            "total": round(self.total, 2),
         }
 
     def __str__(self):

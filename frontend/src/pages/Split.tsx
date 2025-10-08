@@ -446,13 +446,26 @@ export default function Split() {
             {/* Results */}
             {splitResult && (
               <div className="mt-6 border rounded p-4 bg-white">
-                <h3 className="font-semibold mb-2">Split Results</h3>
-                {Object.entries(splitResult).map(([guest, amount]) => (
-                  <div key={guest} className="flex justify-between border-b py-1">
-                    <span>{guest}</span>
-                    <span className="font-bold text-green-600">
-                      ${typeof amount === 'number' ? amount.toFixed(2) : amount}
-                    </span>
+                <h3 className="font-semibold mb-4">Split Results</h3>
+                {Object.entries(splitResult).map(([guest, data]) => (
+                  <div key={guest} className="mb-4 pb-3 border-b last:border-b-0">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-2">{guest}</h4>
+
+                    {typeof data === "object" ? (
+                      <div className="text-sm text-gray-700 space-y-1">
+                        <p>Subtotal: ${data.subtotal?.toFixed(2) ?? "0.00"}</p>
+                        <p>Tax: ${data.tax?.toFixed(2) ?? "0.00"}</p>
+                        <p>Service: ${data.service?.toFixed(2) ?? "0.00"}</p>
+                        <p>Tip: ${data.tip?.toFixed(2) ?? "0.00"}</p>
+                        <p className="font-bold text-green-600 mt-2">
+                          Total: ${data.total?.toFixed(2) ?? "0.00"}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-green-600 font-bold">
+                        ${typeof data === "number" ? data.toFixed(2) : data}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>
