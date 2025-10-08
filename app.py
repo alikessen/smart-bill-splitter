@@ -120,7 +120,6 @@ def split_by_item(table_id):
     for order in table.orders:
         ordered_items.extend(order.items)
 
-    print("DEBUG GUEST ITEMS:", guest_items)
     return jsonify(BillSplitter.split_by_item(bill, guest_items, ordered_items))
 
 

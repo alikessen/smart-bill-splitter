@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Minus, Users, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { BillBreakdown, SplitResult, MenuItem } from '../types';
+import { BillBreakdown, SplitResult, MenuItem, GuestBreakdown } from '../types';
 import apiClient from '../api/client';
 import SplitOptions, { SplitMethod } from '../components/SplitOptions';
 import Spinner from '../components/Spinner';
@@ -183,13 +183,34 @@ export default function Split() {
   const addGuest = () => setGuests(prev => [...prev, { name: `Guest ${prev.length + 1}`, amount: 0 }]);
   const removeGuest = (index: number) => guests.length > 1 && setGuests(prev => prev.filter((_, i) => i !== index));
 
+  const getMaxAmountForGuest = (index: number): number => {
+    if (!bill) return 0;
+    const otherGuestsTotal = guests.reduce((sum, guest, i) => i === index ? sum : sum + guest.amount, 0);
+    const remaining = Math.max(0, bill.total - otherGuestsTotal);
+    return Math.round(remaining * 100) / 100;
+  };
+
   const updateGuestAmount = (index: number, amount: number) => {
+    if (Number.isNaN(amount)) {
+      setGuests(prev =>
+        prev.map((g, i) => i === index ? { ...g, amount: 0 } : g)
+      );
+      return;
+    }
+
     if (amount < 0) {
       toast.error("Amount cannot be negative");
       return;
     }
+
+    const maxAllowed = bill ? getMaxAmountForGuest(index) : amount;
+    const clampedAmount = Math.round(Math.min(amount, maxAllowed) * 100) / 100;
+    if (amount - maxAllowed > 0.0001) {
+      toast.error(`Amount exceeds remaining balance. $${maxAllowed.toFixed(2)} left to assign.`);
+    }
+
     setGuests(prev =>
-      prev.map((g, i) => i === index ? { ...g, amount } : g)
+      prev.map((g, i) => i === index ? { ...g, amount: clampedAmount } : g)
     );
   };
 
@@ -237,6 +258,67 @@ export default function Split() {
     if (assigned.length === 0) return 'Unassigned';
     if (assigned.length === 1) return assigned[0];
     return `Split between ${assigned.length} guests`;
+  };
+
+  const formatCurrencyValue = (value: unknown): string => {
+    const numeric = typeof value === "number" ? value : parseFloat(String(value));
+    return Number.isFinite(numeric) ? numeric.toFixed(2) : "0.00";
+  };
+
+  const isGuestBreakdown = (entry: unknown): entry is GuestBreakdown => {
+    return typeof entry === "object" && entry !== null && "total" in entry;
+  };
+
+  const isSummaryEntry = (label: string, entry: unknown): entry is Record<string, unknown> => {
+    return typeof entry === "object" && entry !== null && label.toLowerCase() === "summary";
+  };
+
+  const renderResultContent = (label: string, entry: unknown): React.ReactNode => {
+    if (isGuestBreakdown(entry)) {
+      return (
+        <div className="text-sm text-gray-700 space-y-1">
+          <p>Subtotal: ${formatCurrencyValue(entry.subtotal)}</p>
+          <p>Tax: ${formatCurrencyValue(entry.tax)}</p>
+          <p>Service: ${formatCurrencyValue(entry.service)}</p>
+          <p>Tip: ${formatCurrencyValue(entry.tip)}</p>
+          <p className="font-bold text-green-600 mt-2">
+            Total: ${formatCurrencyValue(entry.total)}
+          </p>
+        </div>
+      );
+    }
+
+    if (isSummaryEntry(label, entry)) {
+      return (
+        <div className="text-sm text-gray-700 space-y-1">
+          {Object.entries(entry).map(([summaryLabel, value]) => {
+            const numeric = typeof value === "number" ? value : parseFloat(String(value));
+            const display = Number.isFinite(numeric)
+              ? `$${numeric.toFixed(2)}`
+              : String(value);
+            return (
+              <p key={summaryLabel}>
+                {summaryLabel}: {display}
+              </p>
+            );
+          })}
+        </div>
+      );
+    }
+
+    if (typeof entry === "number") {
+      return (
+        <p className="text-green-600 font-bold">
+          ${entry.toFixed(2)}
+        </p>
+      );
+    }
+
+    if (typeof entry === "string") {
+      return <p className="text-sm text-gray-700">{entry}</p>;
+    }
+
+    return null;
   };
 
   // --- UI ---
@@ -358,7 +440,8 @@ export default function Split() {
                         <span className="absolute left-3 top-2 text-gray-500">$</span>
                         <input
                           type="number"
-                          step="0.01"
+                          step="0.10"
+                          max={bill ? getMaxAmountForGuest(index) : undefined}
                           placeholder="0.00"
                           value={guest.amount === 0 ? "" : guest.amount}
                           onChange={(e) => {
@@ -447,25 +530,10 @@ export default function Split() {
             {splitResult && (
               <div className="mt-6 border rounded p-4 bg-white">
                 <h3 className="font-semibold mb-4">Split Results</h3>
-                {Object.entries(splitResult).map(([guest, data]) => (
+                {Object.entries(splitResult as Record<string, unknown>).map(([guest, data]) => (
                   <div key={guest} className="mb-4 pb-3 border-b last:border-b-0">
                     <h4 className="text-lg font-semibold text-gray-800 mb-2">{guest}</h4>
-
-                    {typeof data === "object" ? (
-                      <div className="text-sm text-gray-700 space-y-1">
-                        <p>Subtotal: ${data.subtotal?.toFixed(2) ?? "0.00"}</p>
-                        <p>Tax: ${data.tax?.toFixed(2) ?? "0.00"}</p>
-                        <p>Service: ${data.service?.toFixed(2) ?? "0.00"}</p>
-                        <p>Tip: ${data.tip?.toFixed(2) ?? "0.00"}</p>
-                        <p className="font-bold text-green-600 mt-2">
-                          Total: ${data.total?.toFixed(2) ?? "0.00"}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-green-600 font-bold">
-                        ${typeof data === "number" ? data.toFixed(2) : data}
-                      </p>
-                    )}
+                    {renderResultContent(guest, data)}
                   </div>
                 ))}
               </div>

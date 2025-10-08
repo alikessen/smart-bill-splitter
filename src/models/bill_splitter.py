@@ -99,23 +99,7 @@ class BillSplitter:
     @staticmethod
     def split_by_amount(bill: Bill, contributions: dict) -> dict:
         
-        total = bill.calculate_total()
-        paid = sum(contributions.values())
-        remaining = total - paid
-
-        result = {guest: round(amount, 2) for guest, amount in contributions.items()}
-
-        # Show overpaid or remaining amount
-        if remaining < 0:
-            result["Overpaid"] = round(abs(remaining), 2)
-            result["Remaining"] = 0
-        else:
-            result["Remaining"] = round(remaining, 2)
-
-        return result
-        """
-
-        bill._calculate_components()
+        bill.calculate_components()
         total_bill = bill.total
         total_contributed = sum(contributions.values())
 
@@ -147,8 +131,8 @@ class BillSplitter:
             "Total Bill": round(total_bill, 2),
             "Total Contributed": round(total_contributed, 2),
             "Remaining": round(remaining, 2) if remaining > 0 else 0.0,
-            "Overpaid": abs(round(remaining, 2)) if remaining < 0 else 0.0
+            #"Overpaid": abs(round(remaining, 2)) if remaining < 0 else 0.0         # No need at the moment as there is no option to pay more than bill
         }
 
         return result
-        """
+    
